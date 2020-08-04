@@ -7,7 +7,7 @@ Code for papers:
 Bit-split is a novel post-training network quantization framework where no finetuning is needed. 
 
 A8W4 model for ResNet-18:
-[BaiduCloud](链接:https://pan.baidu.com/s/1vIrK7nIuMWZ2CkJ5jUpGWw)
+[BaiduCloud](https://pan.baidu.com/s/1vIrK7nIuMWZ2CkJ5jUpGWw)
 
 Extraction Code: bsci
 
