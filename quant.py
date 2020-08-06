@@ -118,4 +118,12 @@ def get_int_B_exclusive(B_sav, bit):
         B_sum += B_sav[idx] * mask[idx] / (2**idx)
     return B_sum
 
+def get_ot_given_a(W, alpha):
+    [m, n] = W.shape
+    B=W.copy()
+    B=(B>=0).astype(np.float32)*2-1
+    abs_W2 = np.abs(W) * 2
+    B[abs_W2<alpha[:, np.newaxis]] = 0
+
+    return B
 
