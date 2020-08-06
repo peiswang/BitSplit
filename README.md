@@ -26,7 +26,7 @@ Extraction Code: bsci
 
     Please cite our paper if it helps your research:
 
-    @InProceedings{Wang_2017_CVPR,
+    @InProceedings{Wang_2020_ICML,
         author = {Wang, Peisong, Qiang Chen, Xiangyu He, and Cheng, Jian},
         title = {Towards Accurate Post-training Network Quantization via Bit-Split and Stitching},
         booktitle = {Proceedings of the 37nd International Conference on Machine Learning (ICML)},
