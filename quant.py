@@ -72,7 +72,7 @@ def ofwa(W, bitwidth, max_epoch=50):
 
 # ofwa with response reconstruction.
 # Minimize activation matrix reconstruction error using bit-split strategy. 
-# Initialized by "fwa".
+# Initialized by "ofwa".
 def ofwa_rr(X, Y, B_sav, alpha, bitwidth, max_epoch=100):
 
     '''
