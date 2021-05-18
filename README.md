@@ -22,6 +22,10 @@ Extraction Code: bsci
 
     \* Acc@1 69.146 Acc@5 88.670
 
+# Derivation of Eq.(5):
+![Derivation](eq5.png)
+
+
 # Related Papers
 
     Please cite our paper if it helps your research:
