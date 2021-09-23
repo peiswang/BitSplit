@@ -3,6 +3,9 @@
 import numpy as np, math, operator
 import time
 
+# Fixed-point Weight Approximation. 
+# Minimize the MSE quantization error to find the optimal quantization scales
+# Given quantization scale, round-off is used for fixed-point quantization
 def fwa(W, bitwidth):
     max_val = 2**(bitwidth-1) - 1
     alpha = np.abs(W).max(axis=1) / max_val
@@ -15,16 +18,16 @@ def fwa(W, bitwidth):
         alpha = np.sum(W*q, axis=1) / np.sum(q*q, axis=1)
     return q, alpha
 
-
+# Split low-bit weight integers into a list of ternary weights.
 def split(Q, bitwidth):
     Q_sign = np.sign(Q)
     Q_abs = np.abs(Q)
     B_sav = []
     for idx in range(bitwidth-1):
-        B = (Q_abs - Q_abs.astype(np.int)//2*2)
+        B = (Q_abs - Q_abs.astype(np.int)//2*2) # get current last bit
         B *= Q_sign
         B_sav.append(B)
-        Q_abs = (Q_abs.astype(np.int)//2).astype(np.float32)
+        Q_abs = (Q_abs.astype(np.int)//2).astype(np.float32) # Q_abs >> 1
 
     # B_sum = get_int_B(B_sav[::-1])
     # assert((B_sum*4-Q).sum()==0)
@@ -33,11 +36,18 @@ def split(Q, bitwidth):
 
 
 # optimal fixed-point weight approximation
+# Minimize weight matrix reconstruction error using bit-split strategy. 
+# Given quantization scale, we find the 'optimal' low-bit weights that minimize the weight quantization error (instead of using round-off).
+# Initialized by "fwa".
 def ofwa(W, bitwidth, max_epoch=50):
     assert(bitwidth >= 3)
     Q, alpha = fwa(W, bitwidth)
     B_sav = split(Q, bitwidth)
-    alpha *= (2**(bitwidth-2))
+    ########
+    # NOTE: the position of the decimal point is not at the end. E.g. 4-bit fixed-point numbers could be something like:
+    # +1.01, -0.11, +1.10, ... instead of +101, -011, +110, ... .
+    alpha *= (2**(bitwidth-2))  
+    ########
 
     ### iterative optimization
     [m, n] = W.shape
@@ -60,6 +70,9 @@ def ofwa(W, bitwidth, max_epoch=50):
 
     return B_sav, B_sum, alpha
 
+# ofwa with response reconstruction.
+# Minimize activation matrix reconstruction error using bit-split strategy. 
+# Initialized by "ofwa".
 def ofwa_rr(X, Y, B_sav, alpha, bitwidth, max_epoch=100):
 
     '''
@@ -151,12 +164,16 @@ def ofwa_rr_dw(X, Y, B_sav, alpha, bitwidth, max_epoch=100):
 
     return B_sum, alpha
 
+# Stitch a list of ternary vectors into a integer vectors.
 def get_int_B(B_sav):
     B_sum = B_sav[0].copy()
     for idx in range(1, len(B_sav)):
         B_sum += B_sav[idx] / (2**idx)
     return B_sum
 
+# Stitch a list of ternary vectors into a integer vectors. The i-th bit is excluded.
+# NOTE: the position of the decimal point is not at the end. E.g. 4-bit fixed-point numbers could be something like:
+# +1.01, -0.11, +1.10, ... instead of +101, -011, +110, ... .
 def get_int_B_exclusive(B_sav, bit):
     mask = [1.0]*len(B_sav)
     mask[bit] = 0
@@ -165,6 +182,7 @@ def get_int_B_exclusive(B_sav, bit):
         B_sum += B_sav[idx] * mask[idx] / (2**idx)
     return B_sum
 
+# Get the optimal ternary vector, given the quantization scale alpha
 def get_ot_given_a(W, alpha):
     [m, n] = W.shape
     B=W.copy()
