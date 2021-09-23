@@ -103,6 +103,53 @@ def ofwa_rr(X, Y, B_sav, alpha, bitwidth, max_epoch=100):
 
     return B_sum, alpha
 
+def ofwa_rr_dw(X, Y, B_sav, alpha, bitwidth, max_epoch=100):
+
+    '''
+    # X: K,M,d,d
+    # Y: K,M
+    # B: M,N    M kernels
+
+    objective:
+    min(Y-XWA)^2
+    '''
+    # X: M,K,9   (N=d*d)
+    X = np.transpose(X.reshape(X.shape[0], X.shape[1], -1), (1, 0, 2)) # M, K, 9
+    As = np.matmul(np.transpose(X, (0, 2, 1)), X) # M, 9, 9
+
+    alpha_bk = alpha
+    for epoch in range(max_epoch):
+        # given Bi, optimize alpha
+        B_sum = get_int_B(B_sav)
+        XB = np.matmul(X, np.expand_dims(B_sum, axis=2)) # M, K, 1
+        XB = np.squeeze(XB, axis=2) # M, K
+        XB = XB.T
+
+        alpha = np.einsum("ij,ij->j", Y, XB)
+        alpha = alpha / np.einsum("ij,ij->j", XB, XB)
+        nan_pos = np.isnan(alpha)
+        alpha[nan_pos] = alpha_bk[nan_pos]
+
+        # given alpha, optimize Bi
+        for bit in range(bitwidth-1):
+            B = B_sav[bit]
+            B_others = get_int_B_exclusive(B_sav, bit) * alpha[:, np.newaxis]
+            Y_res = Y - np.squeeze(np.matmul(X, np.expand_dims(B_others, axis=2)), axis=2).T # Y_res = Y - np.dot(X, B_others.T)
+
+            T = np.squeeze(np.matmul(np.expand_dims(Y_res.T, axis=1), X), axis=1) #T = np.dot(Y_res.T, X) # M,N
+            ## fix alpha, optimize B
+            # parallel degree: M
+            for n in range(9): # N=9
+                B[:, n] = 0
+                ABn = np.diagonal(np.dot(As[:,n], B.T)) # M #ABn = np.dot(A[n], B.T)
+                lump = 2 * (ABn * (alpha/(2**bit))- T[:, n]) # M
+                B[:, n] = -np.sign(lump)
+
+                B[np.abs(lump) < (alpha/(2**bit)) * As[:,n,n], n] = 0
+
+    B_sum = get_int_B(B_sav)
+
+    return B_sum, alpha
 
 def get_int_B(B_sav):
     B_sum = B_sav[0].copy()
