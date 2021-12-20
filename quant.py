@@ -42,7 +42,7 @@ def ofwa(W, bitwidth, max_epoch=50):
     ### iterative optimization
     [m, n] = W.shape
     for _ in range(max_epoch):
-        print(_)
+        # print(_)
         alpha_old = np.copy(alpha)
         B_sum = get_int_B(B_sav)
         # given Ws, optimize alpha
