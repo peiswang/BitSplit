@@ -7,9 +7,10 @@ Code for papers:
 Bit-split is a novel post-training network quantization framework where no finetuning is needed. 
 
 A8W4 model for ResNet-18:
-[BaiduCloud](https://pan.baidu.com/s/1vIrK7nIuMWZ2CkJ5jUpGWw)
 
-Extraction Code: bsci
+[BaiduCloud](https://pan.baidu.com/s/1vIrK7nIuMWZ2CkJ5jUpGWw) Extraction Code: bsci 
+
+[GoogleDrive](https://drive.google.com/drive/folders/1Tvnbk0RUJul_0pMcBFBKEduImuYVqp3C?usp=sharing)
 
 # Train:
     CUDA_VISIBLE_DEVICES=0,1 python main_quant_resnet18_twostep.py -a resnet18_quan --pretrained ~/data/cnn_models/pytorch/resnet/resnet18-5c106cde.pth --act-bit-width 8 --weight-bit-width 4
@@ -21,6 +22,11 @@ Extraction Code: bsci
 # Results:
 
     \* Acc@1 69.146 Acc@5 88.670
+
+# Derivation of Eq.(5):
+<img src="eq5.png" width = "500" alt="Eq.5" align=center />
+
+
 
 # Related Papers
 
