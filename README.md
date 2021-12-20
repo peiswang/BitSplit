@@ -12,11 +12,15 @@ A8W4 model for ResNet-18:
 
 [GoogleDrive](https://drive.google.com/drive/folders/1Tvnbk0RUJul_0pMcBFBKEduImuYVqp3C?usp=sharing)
 
+# Files:
+* main_quant_resnet18_twostep: slow version, separately extract features for different layers.
+* main_quant_resnet18_twostep_fast: fast version, extract features for all layers in parallel (should be accomplished in around 15 min).
+
 # Train:
-    CUDA_VISIBLE_DEVICES=0,1 python main_quant_resnet18_twostep.py -a resnet18_quan --pretrained ~/data/cnn_models/pytorch/resnet/resnet18-5c106cde.pth --act-bit-width 8 --weight-bit-width 4
+    CUDA_VISIBLE_DEVICES=0 python main_quant_resnet18_twostep_fast.py -a resnet18_quan --pretrained ~/data/cnn_models/pytorch/resnet/resnet18-5c106cde.pth --act-bit-width 8 --weight-bit-width 4
 
 # Test:
-    CUDA_VISIBLE_DEVICES=0,1 python main_quant_resnet18_twostep.py -a resnet18_quan --pretrained ./resnet18_quan/A8W4/state_dict.pth --scales resnet18_quan/A8W4/act_8_scales.npy --act-bit-width 8 --weight-bit-width 4 --evaluate 
+    CUDA_VISIBLE_DEVICES=0 python main_quant_resnet18_twostep_fast.py -a resnet18_quan --pretrained ./resnet18_quan/A8W4/state_dict.pth --scales resnet18_quan/A8W4/act_8_scales.npy --act-bit-width 8 --weight-bit-width 4 --evaluate 
 
 
 # Results:
